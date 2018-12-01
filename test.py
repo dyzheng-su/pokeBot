@@ -1,16 +1,22 @@
 # Work with Python 3.6
+# Diana Zheng
+# Xueyu Zhang
+
 import random
 import asyncio
 import aiohttp
 import json
+import pokebase as pb
 from discord import Game
 from discord.ext.commands import Bot
 
 BOT_PREFIX = ("!")
-TOKEN = "NTE4MjM4NTgwMjA0NzY1MjA2.DuN3oQ.usZM4dEaC9ht2NEPdAmWFJiZN4A"  # Get at discordapp.com/developers/applications/me
+TOKEN = "NTE4MjM4NTgwMjA0NzY1MjA2.DuN3oQ.usZM4dEaC9ht2NEPdAmWFJiZN4A"  
+## Token from specific bot, need to switch token when trying on different accounts.
 
-client = Bot(command_prefix=BOT_PREFIX)
+client = Bot(command_prefix=BOT_PREFIX) 
 
+## Code from the internet as an example of what the bot can do.
 @client.command(name='8ball',
                 description="Answers a yes/no question.",
                 brief="Answers from the beyond.",
@@ -27,10 +33,26 @@ async def eight_ball(context):
     await client.say(random.choice(possible_responses) + ", " + context.message.author.mention)
 
 
+
 @client.command()
 async def square(number):
     squared_value = int(number) * int(number)
     await client.say(str(number) + " squared is " + str(squared_value))
+
+#Simple pokemon look up command. Is working correctly. Need to find more interactionsw ith it.
+@client.command()
+async def lookup(context):
+    mons = pb.pokemon(context)
+    print(mons)
+    await client.say("the pokemon's height is: " + str(mons.location_area_encounters))
+
+#Progress of writing and saving information to files. So far, stuff is being written down.
+#Should keep a dict format and store rankings w/ keys + values.
+@client.command()
+async def save(context):
+    with open('text.txt','a+') as file:
+        file.write(context + "\n")
+        await client.say("Your message was saved: " + context)
 
 
 @client.event
