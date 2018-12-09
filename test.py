@@ -12,7 +12,7 @@ from discord.ext.commands import Bot
 
 BOT_PREFIX = ("!")
 AUTHER = 'PokeBot'
-TOKEN = "NTE1MDA4MTA3MzA3MzM1Njg0.DumeKA.N_dUO0qXQ0CJaD7vcAa7MphmV98"
+TOKEN = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 users = {}
 FOOTER = 'This is a footer'
 user = ''
