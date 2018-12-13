@@ -13,7 +13,7 @@ from discord.ext.commands import Bot
 
 BOT_PREFIX = ("!")
 AUTHOR = 'PokeBot'
-TOKEN = "NTE1MDA4MTA3MzA3MzM1Njg0.DumeKA.N_dUO0qXQ0CJaD7vcAa7MphmV98"
+TOKEN = ""
 FOOTER=''
 MAX = 6
 WILD_MON = ''
