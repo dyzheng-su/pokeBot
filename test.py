@@ -2,7 +2,7 @@
 # Diana Zheng
 # Xueyu Zhang
 import requests
-import discord
+import discord, datetime, time
 import random
 import asyncio
 import aiohttp
@@ -10,9 +10,13 @@ import json
 import pokebase as pb
 from discord import Game
 from discord.ext.commands import Bot
+from discord.ext import commands
+
+
+
 
 BOT_PREFIX = ("!")
-AUTHER = 'PokeBot'
+AUTHOR = 'PokeBot'
 TOKEN = ""
 FOOTER = 'This is a footer'
 WILD_MON = 'XXXXXXXXXXXXXXXXXXX'
@@ -25,9 +29,13 @@ base_mons = ['bulbasaur', 'charmander', 'squirtle', 'chikorita', 'cyndaquil', 't
         'froakie', 'rowlet', 'litten', 'popplio']
 
 
+client = Bot(command_prefix=BOT_PREFIX) 
+
+
+
+
 
 class POKE_USER:
-
     pokemon_list = {}
     win_rate = 0.0
     win_times = 0
@@ -57,8 +65,6 @@ class POKEMON:
         self.name = name
 
 
-client = Bot(command_prefix=BOT_PREFIX) 
-
 
 # @client.command()
 # async def battle(player):
@@ -83,7 +89,7 @@ async def start():
         description = base_list
     )
     embed.set_footer(text="type !pick to pick your first pokemon")
-    embed.set_author(name=AUTHER
+    embed.set_author(name=AUTHOR
         #,icon_url=
     )
 
@@ -104,7 +110,7 @@ async def select(context):
         description = base_list
         )
         embed.set_footer(text=FOOTER)
-        embed.set_author(name=AUTHER
+        embed.set_author(name=AUTHOR
         #,icon_url=
         )
         await client.say(embed=embed)
@@ -114,7 +120,7 @@ async def select(context):
         description = base_list
         )
         embed.set_footer(text=FOOTER)
-        embed.set_author(name=AUTHER
+        embed.set_author(name=AUTHOR
         #,icon_url=
         )
         await client.say(embed=embed)
@@ -137,6 +143,9 @@ async def pick(message):
         await asyncio.sleep(rand_time)
         await wild_pokemon()
 
+
+
+
 @client.command()
 async def info(context):
     user = USERS[context]
@@ -152,7 +161,7 @@ async def info(context):
     )
 
     embed.set_footer(text=FOOTER)
-    embed.set_author(name=AUTHER
+    embed.set_author(name=AUTHOR
         #,icon_url=
     )
 
@@ -178,7 +187,7 @@ async def lookup(context):
     )
     embed.set_footer(text=FOOTER)
     embed.set_image(url=mons.sprites.front_default)
-    embed.set_author(name=AUTHER
+    embed.set_author(name=AUTHOR
         #,icon_url=
     )
     #embed.set_thumbnail
@@ -201,6 +210,7 @@ async def lookup(context):
 
 
 
+
 @client.command()
 async def moves(context):
     context = context.lower()
@@ -219,12 +229,59 @@ async def moves(context):
         description = pokemon_moves
     )
     #embed.set_footer(text=FOOTER)
-    embed.set_author(name=AUTHER,
+    embed.set_author(name=AUTHOR,
         #,icon_url
     )
 
     await client.say(embed=embed)
 
+@client.command(pass_context=True)
+async def battle(ctx):
+        context = ctx.message.content.split()
+
+        # A helper function to return the member's display name
+        member = ctx.message.server.get_member_named(context[1])
+        challenger = ctx.message.author.name
+
+        await client.say(member.mention + "You have been challenged!" )
+
+        poke = context[2].lower()
+        mons = pb.pokemon(poke)
+        embed = discord.Embed(
+            title = (challenger + " has challenged you with " +mons.name.capitalize() + "!")
+        )
+        embed.set_image(url=mons.sprites.front_default)
+        await client.say(embed=embed)
+
+        response = await client.wait_for_message(author=member, timeout=30)
+        if response:
+            challenged_context = response.clean_content.split()
+            challenged_poke = challenged_context[0].lower()
+            challenged_mon = pb.pokemon(challenged_poke)
+            embed2 = discord.Embed(
+                title = (str(member) + " has used " + challenged_mon.name.capitalize() + "!")
+            )
+            embed2.set_image(url=challenged_mon.sprites.front_default)
+            await client.say(embed=embed2)
+            await battle_stats(mons, challenged_mon)
+
+        elif response is None:
+            await client.say(member.mention + " has lost to " + challenger + "!")
+
+async def battle_stats(p1, p2):
+    p2stats = p2.base_experience
+
+    for stat in p2.stats:
+        if stat != "Weight" and stat != "Defense" and stat != "Special-defense"
+            p2stats += stat.effort
+
+    p1stats = p1.base_experience
+
+    for stat in p1.stats:
+        if stat != "Weight" and stat != "Defense" and stat != "Special Defense"
+            p1stats += stat.effort
+
+    return (p2stats >)
 
 async def wild_pokemon():
     global WILD_MON
@@ -245,7 +302,7 @@ async def wild_pokemon():
     )
     embed.set_footer(text="type !catch to catch this wild %s" % wild)
     embed.set_image(url=wild_mon.sprites.front_default)
-    embed.set_author(name=AUTHER
+    embed.set_author(name=AUTHOR
         #,icon_url=
     )
     #embed.set_thumbnail
@@ -263,9 +320,9 @@ async def wild_pokemon():
 
     await client.say(embed=embed)
 
-
 @client.event
 async def on_message(message):
+    print(message.author.name)
     global pick_user, catch_user, select_user
     if message.author == client.user:
         return
@@ -288,6 +345,7 @@ async def list_servers():
         for server in client.servers:
             print(server.name)
         await asyncio.sleep(60)
+
 
 
 
