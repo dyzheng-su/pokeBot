@@ -155,9 +155,9 @@ async def info(ctx):
     if username in USERS:
         user = USERS[username]
         pl = user.pokemon_list
-        des = ('pokemons %d | total battles %d | total win %d | win percent %d\n\n\n') % (user.count, user.battle_times, user.win_times, user.win_rate)
+        des = ('pokemons %d | total battles %d | total win %d | win percent %.2f\n\n\n') % (user.count, user.battle_times, user.win_times, user.win_rate)
         for name in pl:
-            des += ('%s | level %d | battle times %d | battle percent %d | win times %d | win rate %d\n') % (pl[name].name, 
+            des += ('%s | level %d | battle times %d | battle percent %2.f | win times %d | win rate %.2f\n') % (pl[name].name, 
                 pl[name].level, pl[name].battle_times, pl[name].battle_percent, pl[name].win_times, pl[name].win_rate)
 
         embed = discord.Embed(
