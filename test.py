@@ -12,11 +12,12 @@ from discord import Game
 from discord.ext.commands import Bot
 
 BOT_PREFIX = ("!")
-AUTHER = 'PokeBot'
-TOKEN = ""
-FOOTER = 'This is a footer'
+AUTHOR = 'PokeBot'
+TOKEN = "NTE1MDA4MTA3MzA3MzM1Njg0.DumeKA.N_dUO0qXQ0CJaD7vcAa7MphmV98"
+FOOTER=''
 MAX = 6
 WILD_MON = ''
+CATCHED = False
 USERS = {}
 base_mons = ['bulbasaur', 'charmander', 'squirtle', 'chikorita', 'cyndaquil', 'totodile', 'treecko',
         'torchic', 'mudkip', 'turtwig', 'chimchar', 'piplup', 'snivy', 'tepig', 'oshawott', 'chespin', 'fennekin', 
@@ -37,14 +38,6 @@ class POKE_USER:
             pokemon_list = {}
         self.username = username
         self.pokemon_list = pokemon_list
-        #self.selected_pokemon = POKEMON(base_pokemon)
-        # self.pokemon_list[base_pokemon] = self.selected_pokemon
-        #self.count += 1
-
-    # def select(self, pokemon):
-    #     if pokemon in pokemon_list:
-    #         self.selected_pokemon = self.pokemon_list[pokemon]
-    #         self.selected_pokemon.battle_percent = self.selected_pokemon.battle_times / self.battle_times
 
 
 class POKEMON:
@@ -59,15 +52,6 @@ class POKEMON:
 
 
 client = Bot(command_prefix=BOT_PREFIX) 
-
-
-# @client.command()
-# async def battle(player):
-
-
-# @client.command()
-# async def ranking():
-
 
 
 @client.command(pass_context=True)
@@ -93,10 +77,15 @@ async def start(ctx):
             description = base_list
         )
         embed.set_footer(text="type !pick to pick your first pokemon")
-        embed.set_author(name=AUTHER
+        embed.set_author(name=AUTHOR
             #,icon_url=
         )
         await client.say(embed=embed)
+
+        while 1:
+            rand_time = random.randrange(100,200)
+            await asyncio.sleep(rand_time)
+            await wild_pokemon()
 
 
 @client.command(pass_context=True)
@@ -113,7 +102,7 @@ async def select(ctx):
         description = base_list
         )
         embed.set_footer(text=FOOTER)
-        embed.set_author(name=AUTHER
+        embed.set_author(name=AUTHOR
         #,icon_url=
         )
         await client.say(embed=embed)
@@ -123,7 +112,7 @@ async def select(ctx):
         description = base_list
         )
         embed.set_footer(text=FOOTER)
-        embed.set_author(name=AUTHER
+        embed.set_author(name=AUTHOR
         #,icon_url=
         )
         await client.say(embed=embed)
@@ -154,44 +143,79 @@ async def pick(ctx):
             else:
                 await client.say(("%s is not a base pokemon" % mon))
 
-        while 1:
-            rand_time = random.randrange(200,500)
-            await asyncio.sleep(rand_time)
-            await wild_pokemon()
-
 
 @client.command(pass_context=True)
 async def info(ctx):
-    user = USERS[ctx.message.author.name]
-    pl = user.pokemon_list
-    des = ('pokemons %d | total battles %d | total win %d | win percent %d\n\n\n') % (user.count, user.battle_times, user.win_times, user.win_rate)
-    for name in pl:
-        des += ('%s | level %d | battle times %d | battle percent %d | win times %d | win rate %d\n') % (pl[name].name, 
-            pl[name].level, pl[name].battle_times, pl[name].battle_percent, pl[name].win_times, pl[name].win_rate)
+    context = ctx.message.content.split()
+    if len(context) > 1:
+        username = context[1]
+    else:
+        username = ctx.message.author.name
 
-    embed = discord.Embed(
-        title = ('%s\'s infomation') % ctx.message.content.split()[1],
-        description = des
-    )
+    if username in USERS:
+        user = USERS[username]
+        pl = user.pokemon_list
+        des = ('pokemons %d | total battles %d | total win %d | win percent %d\n\n\n') % (user.count, user.battle_times, user.win_times, user.win_rate)
+        for name in pl:
+            des += ('%s | level %d | battle times %d | battle percent %d | win times %d | win rate %d\n') % (pl[name].name, 
+                pl[name].level, pl[name].battle_times, pl[name].battle_percent, pl[name].win_times, pl[name].win_rate)
 
-    embed.set_footer(text=FOOTER)
-    embed.set_author(name=AUTHER
-        #,icon_url=
-    )
+        embed = discord.Embed(
+            title = ('%s\'s infomation') % username,
+            description = des
+        )
 
-    await client.say(embed=embed)
+        embed.set_footer(text=FOOTER)
+        embed.set_author(name=AUTHOR
+            #,icon_url=
+        )
+        await client.say(embed=embed)
+
+    else:
+        await client.say("%s has not created an account yet")
 
 
 @client.command(pass_context=True)
 async def catch(ctx):
-    user = USERS[ctx.message.author.name]
-    if user.count == MAX: 
-        await client.say("%s already has 6 pokemon.\n type !release to release a pokemon" % user.username)
+    global CATCHED
+    if ctx.message.author.name not in USERS:
+        await client.say("type !start to create your account first")
     else:
-        new_pokemon = POKEMON(WILD_MON)
-        user.pokemon_list[WILD_MON] = new_pokemon
-        user.count += 1
-        await client.say('type !info to check your new pokemons')
+        if CATCHED: 
+            await client.say("%s has been caught!" % WILD_MON)
+        else:
+            user = USERS[ctx.message.author.name]
+            if WILD_MON in user.pokemon_list:
+                await client.say("%s already had a %s" % (user.username, WILD_MON))
+            elif user.count == MAX: 
+                await client.say("%s already has 6 pokemon.\n type !release to release a pokemon" % user.username)
+            else:
+                new_pokemon = POKEMON(WILD_MON)
+                user.pokemon_list[WILD_MON] = new_pokemon
+                user.count += 1
+                await client.say('%s caught this wild %s' % (user.username, WILD_MON))
+                CATCHED = True
+
+
+
+@client.command(pass_context=True)
+async def release(ctx):
+    context = ctx.message.cotent.split()
+    if len(context) == 1:
+        await client.say("Please specify the pokemon that you want to release")
+        return
+    user = ctx.message.author.name 
+    if user not in USERS:
+        await client.say("type !start to create your account first")
+    else:
+        pl = USERS[user].pokemon_list
+        mon = ctx.messsage.content.split()[1]
+        if mon not in pl:
+            await client.say("%s does not have a %s \n type !info to check your list" % (user, mon))
+        else:
+            pl.pop(mon)
+            user.count -= 1
+            await client.say("%s has released a %s" % (user.username, mon))
 
 
 
@@ -208,7 +232,7 @@ async def lookup(ctx):
     )
     embed.set_footer(text=FOOTER)
     embed.set_image(url=mons.sprites.front_default)
-    embed.set_author(name=AUTHER
+    embed.set_author(name=AUTHOR
         #,icon_url=
     )
     #embed.set_thumbnail
@@ -230,53 +254,123 @@ async def lookup(ctx):
     await client.say(embed=embed)
 
 
+
 @client.command(pass_context=True)
 async def battle(ctx):
-        context = ctx.message.content.split()
+    context = ctx.message.content.split()
 
-        # A helper function to return the member's display name
-        member = ctx.message.server.get_member_named(context[1])
-        challenger = ctx.message.author.name
 
-        await client.say(member.mention + "You have been challenged!" )
-
+    # A helper function to return the member's display name
+    member = ctx.message.server.get_member_named(context[1])
+    challenger = ctx.message.author.name
+    if challenger not in USERS or context[1] not in USERS:
+        await client.say("Both players must have an account first.\nType !start to create your account!")
+    elif len(context) < 3:
+        await client.say("Please enter in the Player you wish to battle and the pokemon you wish to battle them.")
+    else:
         poke = context[2].lower()
-        mons = pb.pokemon(poke)
-        embed = discord.Embed(
-            title = (challenger + " has challenged you with " +mons.name.capitalize() + "!")
-        )
-        embed.set_image(url=mons.sprites.front_default)
-        await client.say(embed=embed)
+        if poke not in USERS[challenger].pokemon_list:
+            await client.say("You do not have a %s" % poke)
+        else:
+            await client.say(member.mention + "You have been challenged!" ) 
 
-        response = await client.wait_for_message(author=member, timeout=30)
-        if response:
-            challenged_context = response.clean_content.split()
-            challenged_poke = challenged_context[0].lower()
-            challenged_mon = pb.pokemon(challenged_poke)
-            embed2 = discord.Embed(
-                title = (str(member) + " has used " + challenged_mon.name.capitalize() + "!")
+            poke = context[2].lower()
+            mons = pb.pokemon(poke)
+            embed = discord.Embed(
+                title = (challenger + " has challenged you with " +mons.name.capitalize() + "!")
             )
-            embed2.set_image(url=challenged_mon.sprites.front_default)
-            await client.say(embed=embed2)
-            #await battle_stats(mons, challenged_mon)
+            embed.set_image(url=mons.sprites.front_default)
+            await client.say(embed=embed)   
 
-        elif response is None:
-            await client.say(member.mention + " has lost to " + challenger + "!")
+            response = await client.wait_for_message(author=member, timeout=30)
 
-# async def battle_stats(p1, p2):
-#     p2stats = p2.base_experience
+            if response is None:
+                await client.say("%s did not respond. Battle canceled.")
+                # USERS[context[1]].battle_times +=1
+                # USERS[challenger].battle_times +=1
+                # USERS[context[1]].win_rate = USERS[context[1]].win_times / USERS[context[1]].battle_times
+                # USERS[challenger].win_rate = USERS[challenger].win_times / USERS[challenger].battle_times
+            else:    
+                challenged_poke = response.content.lower()
+                if challenged_poke not in USERS[context[1]].pokemon_list:
+                    await client.say("You do not have a %s. Battle interrupted." % challenged_poke)
+                else:
+                    challenged_mon = pb.pokemon(challenged_poke)
+                    embed2 = discord.Embed(
+                        title = (str(member) + " has used " + challenged_mon.name.capitalize() + "!")
+                    )
+                    embed2.set_image(url=challenged_mon.sprites.front_default)
+                    await client.say(embed=embed2)  
 
-#     for stat in p2.stats:
-#         if stat != "Weight" and stat != "Defense" and stat != "Special-defense"
-#             p2stats += stat.effort
+                    USERS[context[1]].battle_times +=1
+                    USERS[challenger].battle_times +=1  
 
-#     p1stats = p1.base_experience
+                    update_pokemon(context[1],challenged_poke)
+                    update_pokemon(challenger,poke) 
 
-#     for stat in p1.stats:
-#         if stat != "Weight" and stat != "Defense" and stat != "Special Defense"
-#             p1stats += stat.effort
+                    if battle_stats(mons, challenged_mon) == 1:
+                        winner = challenger
+                        url=mons.sprites.front_default
+                        USERS[winner].win_times += 1
+                        USERS[winner].win_rate = USERS[winner].win_times / USERS[winner].battle_times
+                        inc_pokemon(challenger, poke)   
 
-#     return (p2stats >)
+                    elif battle_stats(mons, challenged_mon) == 2:
+                        winner = context[1]
+                        url=challenged_mon.sprites.front_default
+                        USERS[winner].win_times += 1
+                        USERS[winner].win_rate = USERS[winner].win_times / USERS[winner].battle_times
+                        inc_pokemon(context[1], challenged_poke)    
+
+                    else:
+                        winner =  "Draw!"
+                        pikachu = pb.pokemon("pikachu")
+                        url=pikachu.sprites.front_default    
+                    winningEmbed = discord.Embed(
+                        title = ("Winner: "+ winner))
+                    winningEmbed.set_image(url=url)
+                        
+                    await client.say(embed = winningEmbed)  
+
+            
+
+def inc_pokemon(player, mon):
+    user = USERS[player]
+    pl = user.pokemon_list
+    if mon in pl:
+        pl[mon].battle_percent = pl[mon].battle_times / user.battle_times
+        pl[mon].win_times += 1
+        pl[mon].win_rate = pl[mon].win_times / pl[mon].battle_times
+            
+def update_pokemon(player, mon):
+    user = USERS[player]
+    pl = user.pokemon_list
+    if mon in pl:
+        pl[mon].battle_times +=1
+        pl[mon].battle_percent = pl[mon].battle_times / user.battle_times
+        pl[mon].win_rate = pl[mon].win_times / pl[mon].battle_times
+            
+
+def battle_stats(p1, p2):
+    p2stats = p2.base_experience
+
+    for stat in p2.stats:
+        if (stat.stat.name != "Weight") and (stat.stat.name != "Defense") and (stat.stat.name != "Special-defense"):
+            p2stats += stat.effort
+
+    p1stats = p1.base_experience
+
+    for stat in p1.stats:
+        if stat.stat.name != "Weight" and stat.stat.name != "Defense" and stat.stat.name != "Special-defense":
+            p1stats += stat.effort
+
+    if p1stats > p2stats:
+        return 1
+    elif p2stats > p1stats:
+        return 2
+    else:
+        return 0
+
 
 
 @client.command(pass_context=True)
@@ -297,15 +391,14 @@ async def moves(ctx):
         description = pokemon_moves
     )
     #embed.set_footer(text=FOOTER)
-    embed.set_author(name=AUTHER,
+    embed.set_author(name=AUTHOR,
         #,icon_url
     )
-
     await client.say(embed=embed)
 
 
 async def wild_pokemon():
-    global WILD_MON
+    global WILD_MON, CATCHED
 
     url = "https://pokeapi.co/api/v2/pokemon/"
     response = requests.get(url)
@@ -315,6 +408,7 @@ async def wild_pokemon():
     wild = data['results'][rand]['name']
 
     WILD_MON = wild
+    CATCHED = False
 
     wild_mon = pb.pokemon(wild)
     embed = discord.Embed(
@@ -323,7 +417,7 @@ async def wild_pokemon():
     )
     embed.set_footer(text="type !catch to catch this wild %s" % wild)
     embed.set_image(url=wild_mon.sprites.front_default)
-    embed.set_author(name=AUTHER
+    embed.set_author(name=AUTHOR
         #,icon_url=
     )
     #embed.set_thumbnail
