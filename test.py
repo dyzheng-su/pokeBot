@@ -11,9 +11,11 @@ import pokebase as pb
 from discord import Game
 from discord.ext.commands import Bot
 
+#global variable
+
 BOT_PREFIX = ("!")
 AUTHOR = 'PokeBot'
-TOKEN = ""
+TOKEN = "NTE1MDA4MTA3MzA3MzM1Njg0.DumeKA.N_dUO0qXQ0CJaD7vcAa7MphmV98"
 FOOTER=''
 MAX = 6
 WILD_MON = ''
@@ -24,14 +26,14 @@ base_mons = ['bulbasaur', 'charmander', 'squirtle', 'chikorita', 'cyndaquil', 't
         'froakie', 'rowlet', 'litten', 'popplio']
 
 
-
+# Create an POKE_USER object for each user
+# Produced by Xueyu Zhang
 class POKE_USER:
-
     win_rate = 0.0
     win_times = 0
     battle_times = 0
     count = 0
-    selected_pokemon = None
+    #selected_pokemon = None
 
     def __init__(self, username, pokemon_list=None):
         if pokemon_list is None:
@@ -39,7 +41,8 @@ class POKE_USER:
         self.username = username
         self.pokemon_list = pokemon_list
 
-
+# Create an POKEMON object
+# Produced by Xueyu Zhang
 class POKEMON:
     level = 1
     battle_times = 0
@@ -54,6 +57,9 @@ class POKEMON:
 client = Bot(command_prefix=BOT_PREFIX) 
 
 
+# This command has to go first before a user join the game.
+# Will create an account for the user.
+# Produced by Xueyu Zhang
 @client.command(pass_context=True)
 async def start(ctx):
     new_user = ctx.message.author.name
@@ -82,43 +88,46 @@ async def start(ctx):
         )
         await client.say(embed=embed)
 
+        # When the game started, wild pokemons will appeared randomly
         while 1:
-            rand_time = random.randrange(100,200)
+            rand_time = random.randrange(50,100)
             await asyncio.sleep(rand_time)
             await wild_pokemon()
 
 
-@client.command(pass_context=True)
-async def select(ctx):
-    context = ctx.message.content.split()[1].lower()
-    user = USERS[ctx.message.author.name]
-    pl = user.pokemon_list
+# @client.command(pass_context=True)
+# async def select(ctx):
+#     context = ctx.message.content.split()[1].lower()
+#     user = USERS[ctx.message.author.name]
+#     pl = user.pokemon_list
 
-    new_select_mon = pl.get(context,0)
-    if new_select_mon:
-        user.selected_pokemon = new_select_mon
-        embed = discord.Embed(
-        title = '%s select %s' % (user.username, context), 
-        description = base_list
-        )
-        embed.set_footer(text=FOOTER)
-        embed.set_author(name=AUTHOR
-        #,icon_url=
-        )
-        await client.say(embed=embed)
-    else:
-        embed = discord.Embed(
-        title = '%s can not select %s, type !info to check pokemon list' % (user.username, context), 
-        description = base_list
-        )
-        embed.set_footer(text=FOOTER)
-        embed.set_author(name=AUTHOR
-        #,icon_url=
-        )
-        await client.say(embed=embed)
+#     new_select_mon = pl.get(context,0)
+#     if new_select_mon:
+#         user.selected_pokemon = new_select_mon
+#         embed = discord.Embed(
+#         title = '%s select %s' % (user.username, context), 
+#         description = base_list
+#         )
+#         embed.set_footer(text=FOOTER)
+#         embed.set_author(name=AUTHOR
+#         #,icon_url=
+#         )
+#         await client.say(embed=embed)
+#     else:
+#         embed = discord.Embed(
+#         title = '%s can not select %s, type !info to check pokemon list' % (user.username, context), 
+#         description = base_list
+#         )
+#         embed.set_footer(text=FOOTER)
+#         embed.set_author(name=AUTHOR
+#         #,icon_url=
+#         )
+#         await client.say(embed=embed)
 
 
-
+# When the user join the game, he/she must pick a base pokemon
+# Users already had a base pokemon are not allowed to pick again
+# Produced by Xueyu Zhang
 @client.command(pass_context=True)
 async def pick(ctx):
     new_user = ctx.message.author.name
@@ -135,8 +144,6 @@ async def pick(ctx):
                 msg = "Good luck! %s and your pokemon %s" % (new_user, mon)
                 pl = user.pokemon_list
                 new_pokemon = POKEMON(mon)
-                user.selected_pokemon = new_pokemon
-                print(user.username, user.selected_pokemon.name)
                 pl[mon] = new_pokemon
                 USERS[new_user].count += 1
                 await client.say(msg)
@@ -144,6 +151,10 @@ async def pick(ctx):
                 await client.say(("%s is not a base pokemon" % mon))
 
 
+# To look up a user's infomation
+# if there is no username input, then user will see his/her own information
+# Only users who have started the game can be seen.
+# Produced by Xueyu Zhang
 @client.command(pass_context=True)
 async def info(ctx):
     context = ctx.message.content.split()
@@ -151,7 +162,6 @@ async def info(ctx):
         username = context[1]
     else:
         username = ctx.message.author.name
-
     if username in USERS:
         user = USERS[username]
         pl = user.pokemon_list
@@ -175,6 +185,10 @@ async def info(ctx):
         await client.say("%s has not created an account yet")
 
 
+# When a wild random pokemon occurs, users are able to catch it
+# However, only the first one who execute this command can catch it.
+# If a user reach the maximum number of pokemon (6) one can have, he/she can not catch it
+# Produced by Xueyu Zhang
 @client.command(pass_context=True)
 async def catch(ctx):
     global CATCHED
@@ -196,11 +210,11 @@ async def catch(ctx):
                 await client.say('%s caught this wild %s' % (user.username, WILD_MON))
                 CATCHED = True
 
-
-
+# A user can release a pokemon that currently in his/her list
+# Produced by Xueyu Zhang
 @client.command(pass_context=True)
 async def release(ctx):
-    context = ctx.message.cotent.split()
+    context = ctx.message.content.split()
     if len(context) == 1:
         await client.say("Please specify the pokemon that you want to release")
         return
@@ -209,49 +223,59 @@ async def release(ctx):
         await client.say("type !start to create your account first")
     else:
         pl = USERS[user].pokemon_list
-        mon = ctx.messsage.content.split()[1]
+        mon = context[1]
         if mon not in pl:
             await client.say("%s does not have a %s \n type !info to check your list" % (user, mon))
         else:
             pl.pop(mon)
-            user.count -= 1
-            await client.say("%s has released a %s" % (user.username, mon))
+            USERS[user].count -= 1
+            await client.say("%s has released a %s" % (user, mon))
 
 
-
-    
-
-
-#Simple pokemon look up command. Is working correctly. Need to find more interactionsw ith it.
+# Lookup a pokemon information
+# No need to create an account first.
+# Produced by Xueyu Zhang
 @client.command(pass_context=True)
 async def lookup(ctx):
-    content = ctx.message.content.split()[1].lower()
-    mons = pb.pokemon(content)
-    embed = discord.Embed(
-        title = mons.name.capitalize()
-    )
-    embed.set_footer(text=FOOTER)
-    embed.set_image(url=mons.sprites.front_default)
-    embed.set_author(name=AUTHOR
-        #,icon_url=
-    )
-    #embed.set_thumbnail
-    embed.add_field(name='Species', value=mons.species.name, inline=True)
-    #embed.add_field(name='Habitat', value=mons.species.habitat.name, inline=True)
-    embed.add_field(name='Base experience', value=mons.base_experience, inline=True)
-    embed.add_field(name='Id', value=mons.id, inline=True)
-    embed.add_field(name='Height', value=mons.height, inline=True)
-    embed.add_field(name='Weight', value=mons.weight, inline=True)
-    for stat in mons.stats:
-        embed.add_field(name=stat.stat.name.capitalize(), value=stat.effort, inline=True)
+    ct = ctx.message.content.split()
+    if len(ct) == 1: 
+        await client.say("Please specify the pokemon's name")
+        return
+    if len(ct) > 2: 
+        await client.say("Too many inputs")
+        return
+    content = ct[1].lower()
+    try:
+        mons = pb.pokemon(content)
+        embed = discord.Embed(
+            title = mons.name.capitalize()
+        )
+        embed.set_footer(text=FOOTER)
+        embed.set_image(url=mons.sprites.front_default)
+        embed.set_author(name=AUTHOR
+            #,icon_url=
+        )
+        #embed.set_thumbnail
+        embed.add_field(name='Species', value=mons.species.name, inline=True)
+        #embed.add_field(name='Habitat', value=mons.species.habitat.name, inline=True)
+        embed.add_field(name='Base experience', value=mons.base_experience, inline=True)
+        embed.add_field(name='Id', value=mons.id, inline=True)
+        embed.add_field(name='Height', value=mons.height, inline=True)
+        embed.add_field(name='Weight', value=mons.weight, inline=True)
+        for stat in mons.stats:
+            embed.add_field(name=stat.stat.name.capitalize(), value=stat.effort, inline=True)
 
-    abilities = ''
-    for ability in mons.abilities:
-        abilities += (ability.ability.name + ' | ')
+        abilities = ''
+        for ability in mons.abilities:
+            abilities += (ability.ability.name + ' | ')
 
-    embed.add_field(name='Ability', value=abilities, inline=True)
+        embed.add_field(name='Ability', value=abilities, inline=True)
 
-    await client.say(embed=embed)
+        await client.say(embed=embed)
+    except:
+        await client.say("%s is not a pokemon" % content)
+
+
 
 
 
@@ -285,7 +309,8 @@ async def battle(ctx):
             response = await client.wait_for_message(author=member, timeout=30)
 
             if response is None:
-                await client.say("%s did not respond. Battle canceled.")
+                await client.say("%s did not respond. Battle canceled." % context[1])
+                return
                 # USERS[context[1]].battle_times +=1
                 # USERS[challenger].battle_times +=1
                 # USERS[context[1]].win_rate = USERS[context[1]].win_times / USERS[context[1]].battle_times
@@ -364,6 +389,11 @@ def battle_stats(p1, p2):
         if stat.stat.name != "Weight" and stat.stat.name != "Defense" and stat.stat.name != "Special-defense":
             p1stats += stat.effort
 
+    r1 = random.randrange(5,10)
+    r2 = random.randrange(5,10)
+
+    p1stats, p2stats = p1stats * r1, p2stats * r2
+
     if p1stats > p2stats:
         return 1
     elif p2stats > p1stats:
@@ -373,30 +403,34 @@ def battle_stats(p1, p2):
 
 
 
-@client.command(pass_context=True)
-async def moves(ctx):
-    content = ctx.message.content.split()[1].lower()
-    pokemon = pb.pokemon(content)
-    pokemon_moves = ''
-    i = 0
-    for move in pokemon.moves:
-        #if move.version_group_details[0]['version_group']['name'] == 'omega-ruby-alpha-sapphire':
-        pokemon_moves += '%s | ' % (move.move.name)
-        i += 1
-        if not i%5: pokemon_moves += '\n'
+# @client.command(pass_context=True)
+# async def moves(ctx):
+#     content = ctx.message.content.split()[1].lower()
+#     pokemon = pb.pokemon(content)
+#     pokemon_moves = ''
+#     i = 0
+#     for move in pokemon.moves:
+#         #if move.version_group_details[0]['version_group']['name'] == 'omega-ruby-alpha-sapphire':
+#         pokemon_moves += '%s | ' % (move.move.name)
+#         i += 1
+#         if not i%5: pokemon_moves += '\n'
 
     
-    embed = discord.Embed(
-        title = ('%s\'s moves' % (content.capitalize())),
-        description = pokemon_moves
-    )
-    #embed.set_footer(text=FOOTER)
-    embed.set_author(name=AUTHOR,
-        #,icon_url
-    )
-    await client.say(embed=embed)
+#     embed = discord.Embed(
+#         title = ('%s\'s moves' % (content.capitalize())),
+#         description = pokemon_moves
+#     )
+#     #embed.set_footer(text=FOOTER)
+#     embed.set_author(name=AUTHOR,
+#         #,icon_url
+#     )
+#     await client.say(embed=embed)
 
 
+
+# Generated a random wild pokemon with the API
+# invoked in pick() function
+# Produced by Xueyu Zhang
 async def wild_pokemon():
     global WILD_MON, CATCHED
 
