@@ -11,7 +11,9 @@ import pokebase as pb
 from discord import Game
 from discord.ext.commands import Bot
 
-#global variable
+
+# Pokebase is a library that uses the same pokeapi we use later on.
+# We found this and found it easier to use and more organized to use when it came to our plan.
 
 BOT_PREFIX = ("!")
 AUTHOR = 'PokeBot'
@@ -95,7 +97,6 @@ async def start(ctx):
             await wild_pokemon()
 
 
-
 # @client.command(pass_context=True)
 # async def select(ctx):
 #     context = ctx.message.content.split()[1].lower()
@@ -128,7 +129,7 @@ async def start(ctx):
 
 # When the user join the game, he/she must pick a base pokemon
 # Users already had a base pokemon are not allowed to pick again
-# Produced by Xueyu Zhang
+# Produced by Diana Zheng
 @client.command(pass_context=True)
 async def pick(ctx):
     new_user = ctx.message.author.name
@@ -189,7 +190,7 @@ async def info(ctx):
 # When a wild random pokemon occurs, users are able to catch it
 # However, only the first one who execute this command can catch it.
 # If a user reach the maximum number of pokemon (6) one can have, he/she can not catch it
-# Produced by Xueyu Zhang
+# Produced by Diana Zheng
 @client.command(pass_context=True)
 async def catch(ctx):
     global CATCHED
@@ -279,7 +280,10 @@ async def lookup(ctx):
 
 
 
-
+# Battling between players
+# Handles errors between non-players & players
+# Updates player's stats & pokemon stats
+# Created by Diana Zheng
 @client.command(pass_context=True)
 async def battle(ctx):
     context = ctx.message.content.split()
@@ -359,7 +363,8 @@ async def battle(ctx):
                     await client.say(embed = winningEmbed)  
 
             
-
+# Method to help increment pokemon stats 
+# Produced by Diana Zheng
 def inc_pokemon(player, mon):
     user = USERS[player]
     pl = user.pokemon_list
@@ -368,6 +373,8 @@ def inc_pokemon(player, mon):
         pl[mon].win_times += 1
         pl[mon].win_rate = pl[mon].win_times / pl[mon].battle_times
             
+# Method to help increment pokemon stats
+# Produced by Diana Zheng
 def update_pokemon(player, mon):
     user = USERS[player]
     pl = user.pokemon_list
@@ -376,7 +383,8 @@ def update_pokemon(player, mon):
         pl[mon].battle_percent = pl[mon].battle_times / user.battle_times
         pl[mon].win_rate = pl[mon].win_times / pl[mon].battle_times
             
-
+# Method to calculate who wins between two pokemon arguments.
+# Based off pokemon description/stats + a little bit of luck.
 def battle_stats(p1, p2):
     p2stats = p2.base_experience
 
@@ -470,7 +478,8 @@ async def wild_pokemon():
 
     await client.say(embed=embed)
 
-
+# Basic set up of bot
+# Produced by Diana Zheng
 async def list_servers():
     await client.wait_until_ready()
     while not client.is_closed:
@@ -480,6 +489,7 @@ async def list_servers():
         await asyncio.sleep(60)
 
 
-
+# To get the bot online + working with specific discord token
+# Produced by Diana Zheng
 client.loop.create_task(list_servers())
 client.run(TOKEN)
