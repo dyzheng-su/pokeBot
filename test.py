@@ -15,7 +15,7 @@ from discord.ext.commands import Bot
 
 BOT_PREFIX = ("!")
 AUTHOR = 'PokeBot'
-TOKEN = "NTE1MDA4MTA3MzA3MzM1Njg0.DumeKA.N_dUO0qXQ0CJaD7vcAa7MphmV98"
+TOKEN = ""
 FOOTER=''
 MAX = 6
 WILD_MON = ''
@@ -93,6 +93,7 @@ async def start(ctx):
             rand_time = random.randrange(50,100)
             await asyncio.sleep(rand_time)
             await wild_pokemon()
+
 
 
 # @client.command(pass_context=True)
